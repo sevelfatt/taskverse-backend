@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/sevelfatt/taskverse-backend/utils"
 )
@@ -77,15 +76,14 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserController(w http.ResponseWriter, r *http.Request) {
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
+
+	tokenString, err := utils.GetTokenFromHeader(r)
+	if err != nil {
 		utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{
-			"error": "Authorization token is required",
+			"error": err.Error(),
 		})
 		return
 	}
-
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 	claims, err := utils.ValidateAndGetJwtTokenClaims(tokenString)
 	if err != nil {
