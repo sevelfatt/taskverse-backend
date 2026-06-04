@@ -33,10 +33,38 @@ func ValidateAndGetJwtTokenClaims(tokenString string) (jwt.MapClaims, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	expired, err := IsTokenExpired(tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	if expired {
+		return nil, errors.New("token is expired")
+	}
+
 	if !token.Valid {
 		return nil, errors.New("invalid token")
 	}
 	return token.Claims.(jwt.MapClaims), nil
+}
+
+func GetJwtTokenClaims(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		return jwtSecret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return token.Claims.(jwt.MapClaims), nil
+}
+
+func IsTokenExpired(tokenString string) (bool, error) {
+	claims, err := GetJwtTokenClaims(tokenString)
+	if err != nil {
+		return false, err
+	}
+	return claims["exp"].(float64) < float64(time.Now().Unix()), nil
 }
 
 func GetTokenFromHeader(r *http.Request) (string, error) {
