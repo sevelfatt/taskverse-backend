@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/sevelfatt/taskverse-backend/utils"
 )
@@ -61,7 +62,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := LoginService(body.Email, body.Password)
+	tokenString, err := LoginService(body.Email, body.Password)
 	if err != nil {
 		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
@@ -71,33 +72,40 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 
 	utils.RespondJSON(w, http.StatusOK, map[string]any{
 		"message": "User logged in successfully",
-		"user":    user,
+		"token":    tokenString,
 	})
 }
 
 func GetUserController(w http.ResponseWriter, r *http.Request) {
-
-	var params struct {
-		UserId string `json:"user_id"`
-	}
-
-	if err := utils.DecodeJSON(r, &params); err != nil {
-		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{
+			"error": "Authorization token is required",
 		})
 		return
 	}
 
-	if params.UserId == "" {
-		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
-			"error": "User ID is required",
-		})
-		return
-	}
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	user, err := GetUserService(params.UserId)
+	claims, err := utils.ValidateAndGetJwtTokenClaims(tokenString)
 	if err != nil {
-		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
+		utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	userUUID, ok := claims["sub"].(string)
+	if !ok {
+		utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{
+			"error": "Invalid token claims",
+		})
+		return
+	}
+
+	user, err := GetUserService(userUUID)
+	if err != nil {
+		utils.RespondJSON(w, http.StatusUnauthorized, map[string]string{
 			"error": err.Error(),
 		})
 		return

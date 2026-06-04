@@ -45,7 +45,7 @@ func RegisterService(username string, email string, password string) (string, er
 
 }
 
-func LoginService(email string, password string) (bson.M, error) {
+func LoginService(email string, password string) (string, error) {
 	db := lib.MongoClient.Database("taskverse")
 
 	userCollection := db.Collection("users")
@@ -53,14 +53,19 @@ func LoginService(email string, password string) (bson.M, error) {
 	var existingUser bson.M
 	err := userCollection.FindOne(context.TODO(), bson.D{bson.E{Key: "email", Value: email}}).Decode(&existingUser)
 	if err != nil {
-		return nil, errors.New("User not found")
+		return "", errors.New("User not found")
 	}
 
 	if existingUser["password"] != password {
-		return nil, errors.New("Invalid password")
+		return "", errors.New("Invalid password")
 	}
 
-	return existingUser, nil
+	token, err := utils.CreateJwtToken(existingUser["uuid"].(string))
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 
 }
 
