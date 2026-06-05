@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -19,7 +18,7 @@ func init() {
 }
 
 func main(){
-	port := os.Getenv("PORT")
+	port := "8000"
 	if port == "" {
 		log.Fatal("PORT environment variable is not set!")
 	}
