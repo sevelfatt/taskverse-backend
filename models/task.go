@@ -4,6 +4,7 @@ import "time"
 
 type Task struct {
 	UUID string `json:"uuid"`
+	UserUUID string `json:"user_uuid"`
 	Title string `json:"title"`
 	Type string `json:"type"`
 	CreatedAt time.Time `json:"created_at"`
@@ -12,16 +13,10 @@ type Task struct {
 
 type HabitTask struct {
 	Task
-	DaysInWeek []string `json:"days_in_week"`
+	DaysInWeek []time.Weekday `json:"days_in_week"`
 }
 
-type WeeklyTask struct {
-	Task
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
-}
-
-type MonthlyTask struct {
+type WeeklyAndMonthyTask struct {
 	Task
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
