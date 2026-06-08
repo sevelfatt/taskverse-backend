@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sevelfatt/taskverse-backend/core/auth"
+	"github.com/sevelfatt/taskverse-backend/core/task"
 	"github.com/sevelfatt/taskverse-backend/initilization"
 	"github.com/sevelfatt/taskverse-backend/lib"
 	_ "github.com/sevelfatt/taskverse-backend/middlewares"
@@ -28,6 +29,7 @@ func main(){
 
 	// Register routes
 	auth.Route(api)
+	task.Route(api)
 
 	// Print all registered routes
 	printRegisteredRoutes(r)
