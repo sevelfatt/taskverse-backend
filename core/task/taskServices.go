@@ -17,11 +17,11 @@ func GetAllTasksByUserUUIDService(userUUID string) ([]any, error) {
 	taskCollection := db.Collection("tasks")
 
 	var tasks []any
-	cursor, err := taskCollection.Find(context.TODO(), bson.D{bson.E{Key: "user_uuid", Value: userUUID}})
+	cursor, err := taskCollection.Find(context.TODO(), bson.D{bson.E{Key: "useruuid", Value: userUUID}})
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.TODO())
+	// defer cursor.Close(context.TODO())
 
 	if err = cursor.All(context.TODO(), &tasks); err != nil {
 		return nil, err
