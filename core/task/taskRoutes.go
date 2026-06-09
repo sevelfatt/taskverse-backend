@@ -5,9 +5,10 @@ import (
 	"github.com/sevelfatt/taskverse-backend/middlewares"
 )
 
-func Route(router *mux.Router) *mux.Router{
+func Route(router *mux.Router) *mux.Router {
 	taskRouter := router.PathPrefix("/task").Subrouter()
 	taskRouter.HandleFunc("/", middlewares.AuthMiddelware(GetAllTasksByUserUUIDController)).Methods("GET")
+	taskRouter.HandleFunc("/get", middlewares.AuthMiddelware(GetTaskByUUIDController)).Methods("GET")
 	taskRouter.HandleFunc("/create", middlewares.AuthMiddelware(CreateTaskController)).Methods("POST")
 	taskRouter.HandleFunc("/delete", middlewares.AuthMiddelware(DeleteTaskByUUIDController)).Methods("DELETE")
 

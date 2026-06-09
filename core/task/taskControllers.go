@@ -7,8 +7,43 @@ import (
 	"github.com/sevelfatt/taskverse-backend/utils"
 )
 
+func GetTaskByUUIDController(w http.ResponseWriter, r *http.Request){
+	taskUUID := r.URL.Query().Get("uuid")
+
+	if taskUUID == ""{
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
+			"error": "task UUID required",
+		})
+		return
+	}
+
+	task, err := GetTaskByUUIDService(taskUUID)
+	if err != nil {
+		utils.RespondJSON(w, http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	utils.RespondJSON(w, http.StatusOK, map[string]any{
+		"message": "task fetched successfully",
+		"task": task,
+	})
+}
+
 func DeleteTaskByUUIDController(w http.ResponseWriter, r *http.Request) {
-	taskUUID := r.URL.Query().Get("task_uuid")
+	var body struct {
+		TaskUUID string `json:"task_uuid"` 
+	}
+	if err := utils.DecodeJSON(r,&body); err != nil{
+		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
+			"error": "Invalid request body",
+		})
+		return
+	}
+
+	taskUUID := body.TaskUUID
+
 	if taskUUID == "" {
 		utils.RespondJSON(w, http.StatusBadRequest, map[string]string{
 			"error": "Task UUID Required",

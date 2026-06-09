@@ -11,6 +11,20 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+func GetTaskByUUIDService(taskUUID string) (any, error){
+	db := lib.MongoClient.Database("taskverse")
+
+	taskCollection := db.Collection("tasks")
+
+	var task any
+	err := taskCollection.FindOne(context.TODO(), bson.D{bson.E{Key: "task.uuid", Value: taskUUID}}).Decode(&task)
+	if err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
 func DeleteTaskByUUIDService(taskUUID string) error {
 	db := lib.MongoClient.Database("taskverse")
 
