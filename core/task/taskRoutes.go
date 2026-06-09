@@ -9,6 +9,7 @@ func Route(router *mux.Router) *mux.Router{
 	taskRouter := router.PathPrefix("/task").Subrouter()
 	taskRouter.HandleFunc("/", middlewares.AuthMiddelware(GetAllTasksByUserUUIDController)).Methods("GET")
 	taskRouter.HandleFunc("/create", middlewares.AuthMiddelware(CreateTaskController)).Methods("POST")
+	taskRouter.HandleFunc("/delete", middlewares.AuthMiddelware(DeleteTaskByUUIDController)).Methods("DELETE")
 
 	return taskRouter
 }

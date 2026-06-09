@@ -11,17 +11,30 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+func DeleteTaskByUUIDService(taskUUID string) error {
+	db := lib.MongoClient.Database("taskverse")
+
+	taskCollection := db.Collection("tasks")
+
+	_, err := taskCollection.DeleteOne(context.TODO(), bson.D{bson.E{Key: "task.uuid", Value: taskUUID}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetAllTasksByUserUUIDService(userUUID string) ([]any, error) {
 	db := lib.MongoClient.Database("taskverse")
 
 	taskCollection := db.Collection("tasks")
 
 	var tasks []any
-	cursor, err := taskCollection.Find(context.TODO(), bson.D{bson.E{Key: "useruuid", Value: userUUID}})
+	cursor, err := taskCollection.Find(context.TODO(), bson.D{bson.E{Key: "task.useruuid", Value: userUUID}})
 	if err != nil {
 		return nil, err
 	}
-	// defer cursor.Close(context.TODO())
+	defer cursor.Close(context.TODO())
 
 	if err = cursor.All(context.TODO(), &tasks); err != nil {
 		return nil, err
@@ -56,7 +69,20 @@ func CreateTaskService(userUUID string, title string, taskType string, daysInWee
 			},
 			Date: startDate,
 		})
-	case "weekly_monthly":
+	case "weekly":
+		return createWeeklyMonthlyTask(models.WeeklyAndMonthyTask{
+			Task: models.Task{
+				UUID: utils.GenerateUUID(),
+				UserUUID: userUUID,
+				Title: title,
+				Type: taskType,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+			StartDate: startDate,
+			EndDate: endDate,
+		})
+	case "monthly":
 		return createWeeklyMonthlyTask(models.WeeklyAndMonthyTask{
 			Task: models.Task{
 				UUID: utils.GenerateUUID(),
